@@ -93,6 +93,7 @@ def check_plane_speeds():
     speeds_df = pd.read_sql_query(query, connection)
     print(speeds_df)
 
+#Bullet point 13
 def analyze_inner_product_vs_air_time():
     query = """
             SELECT flight, air_time, dep_time
@@ -106,7 +107,7 @@ def analyze_inner_product_vs_air_time():
     air_times = []
     
     for idx, row in df.iterrows():
-        ip = inner_product_flight_wind(row["flight"])
+        ip = inner_product_flight_wind(row["flight"]) #function name for bullet point 12?
         if ip is not None:
             inner_products.append(ip)
             air_times.append(row["air_time"])
@@ -130,7 +131,7 @@ def analyze_inner_product_vs_air_time():
 
 
 if __name__ == "__main__":
-    compare_distances()
+    #compare_distances()
     #plot_distance_vs_arr_delay()
     #update_plane_speed()
-    #check_plane_speeds()
+    check_plane_speeds()
