@@ -87,6 +87,6 @@ if __name__ == "__main__":
     #precipation_vs_delays() #precipiation doesn't seem to effect the delay time
     #wind_speed_vs_plane_models() #Shows the disbrution over which plane models are used during different wind conditions, indicating that they might preform better under certain cicumstances
     #flight_distance_vs_wind_speed()# the regression line moves down meaning that longer flights experience less strong wind
-    plane_model_vs_delay_during_wind()
+    plane_model_vs_delay_during_wind()# some models experience more delay during windy conditions, other ones stay the same
 
 connection.close()
