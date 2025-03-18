@@ -1,92 +1,130 @@
-import sqlite3
+import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import sqlite3
+import plotly.express as px
 
-connection = sqlite3.connect("flights_database.db")
+# === Apply Page Configuration ===
+st.set_page_config(
+    page_title="Flight Statistics Dashboard",
+    page_icon="✈️",
+    layout="wide"
+)
 
-connection.execute("""
-    CREATE TEMP TABLE temp_weather AS
-    SELECT * FROM weather
-    WHERE temp IS NOT NULL AND wind_speed IS NOT NULL AND precip IS NOT NULL;
-""")
+# === Load Airport Data ===
+airports_df = pd.read_csv("airports.csv")
 
-# Use the temporary table for analysis
-query = """
-    SELECT f.flight, f.origin, f.dep_time, f.sched_dep_time, 
-           (strftime('%s', date(tw.time_hour, 'unixepoch')) + 
-            (CAST(f.dep_time / 100 AS INTEGER) * 3600) + 
-            ((f.dep_time % 100) * 60)) AS dep_unix, 
-           tw.time_hour AS weather_unix, 
-           f.air_time, f.distance, 
-           tw.temp, tw.wind_speed, tw.precip, p.model
-    FROM flights f
-    JOIN temp_weather tw  -- Use temporary table instead of 'weather'
-        ON f.origin = tw.origin 
-        AND abs(
-            (strftime('%s', date(tw.time_hour, 'unixepoch')) + 
-            (CAST(f.dep_time / 100 AS INTEGER) * 3600) + 
-            ((f.dep_time % 100) * 60)) - tw.time_hour
-        ) <= 1800
-    JOIN planes p ON f.tailnum = p.tailnum
-    WHERE f.dep_time IS NOT NULL 
-    AND tw.wind_speed IS NOT NULL
-    LIMIT 1000;
-"""
-df = pd.read_sql_query(query, connection)
+# === Sidebar Section ===
+st.sidebar.header("Flight Selection ✈️")
+departure_airport = st.sidebar.selectbox("Select Departure Airport", airports_df["name"].unique())
+arrival_airport = st.sidebar.selectbox("Select Arrival Airport", airports_df["name"].unique())
 
-def plot_wind_vs_airtime():
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x=df['wind_speed'], y=df['air_time'], hue=df['distance'], alpha=0.7, palette="coolwarm")
-    plt.xlabel("Wind Speed (mph)")
-    plt.ylabel("Air Time (minutes)")
-    plt.title("Impact of Wind Speed on Air Time (Colored by Distance)")
-    plt.legend(title="Distance (miles)")
-    plt.show()
+# === Connect to Database ===
+conn = sqlite3.connect("flights_database.db")
 
-def precipation_vs_delays():
-    df['delay'] = (pd.to_datetime(df['dep_unix'], unit='s') - pd.to_datetime(df['weather_unix'], unit='s')).dt.total_seconds() / 60
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(x=pd.cut(df['precip'], bins=[0, 0.1, 0.5, 1, 5, 10]), y=df['delay'])
-    plt.xlabel("Precipitation (inches)")
-    plt.ylabel("Flight Delay (minutes)")
-    plt.title("Flight Delays vs Precipitation")
-    plt.show()
+# Prevent selecting the same airport
+if departure_airport == arrival_airport:
+    st.warning("⚠️ Please select a different destination airport.")
+else:
+    # SQL Query for Flight Statistics
+    query = """
+    SELECT carrier, COUNT(*) as num_flights, AVG(dep_delay) as avg_dep_delay, 
+           AVG(arr_delay) as avg_arr_delay, MIN(dep_time) as earliest_dep, 
+           MAX(dep_time) as latest_dep
+    FROM flights
+    WHERE origin = (SELECT faa FROM airports WHERE name = ?)
+    AND dest = (SELECT faa FROM airports WHERE name = ?)
+    GROUP BY carrier
+    """
+    
+    df_flight_stats = pd.read_sql_query(query, conn, params=(departure_airport, arrival_airport))
 
-def wind_speed_vs_plane_models():
-    plt.figure(figsize=(12, 6))
-    sns.boxplot(x="model", y="wind_speed", data=df)
-    plt.xticks(rotation=90)
-    plt.xlabel("Plane Model")
-    plt.ylabel("Wind Speed (mph)")
-    plt.title("Wind Speed Distribution by Plane Model")
-    plt.show()
+    # === Dashboard Header ===
+    st.markdown(f"""
+    <h1 style='text-align: center; color: #4CAF50;'>Flight Statistics Dashboard</h1>
+    <h3 style='text-align: center;'>From {departure_airport} 🛫 to {arrival_airport} 🛬</h3>
+    <hr>
+    """, unsafe_allow_html=True)
 
-def flight_distance_vs_wind_speed():
-    plt.figure(figsize=(10, 6))
-    sns.regplot(x=df['distance'], y=df['wind_speed'])
-    plt.xlabel("Flight Distance (miles)")
-    plt.ylabel("Wind Speed (mph)")
-    plt.title("Flight Distance vs Wind Speed")
-    plt.show()
+    if df_flight_stats.empty:
+        st.warning("No flight data available for the selected route.")
+    else:
+        # === Summary Metrics ===
+        total_flights = df_flight_stats["num_flights"].sum()
+        avg_dep_delay = df_flight_stats["avg_dep_delay"].mean()
+        avg_arr_delay = df_flight_stats["avg_arr_delay"].mean()
+        earliest_dep = df_flight_stats["earliest_dep"].min()
+        latest_dep = df_flight_stats["latest_dep"].max()
 
-def plane_model_vs_delay_during_wind():
-    df['delay'] = (pd.to_datetime(df['dep_unix'], unit='s') - pd.to_datetime(df['weather_unix'], unit='s')).dt.total_seconds() / 60
-    plt.figure(figsize=(12, 6))
-    sns.boxplot(x="model", y="delay", hue=pd.cut(df['wind_speed'], bins=[0, 10, 20, 30, 40]), data=df)
-    plt.xticks(rotation=90)
-    plt.xlabel("Plane Model")
-    plt.ylabel("Delay (minutes)")
-    plt.title("Plane Model vs Delay in Different Wind Speeds")
-    plt.legend(title="Wind Speed (mph)")
-    plt.show()
+        # Display Key Metrics in Columns
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Flights", total_flights, "📊")
+        col2.metric("Avg Departure Delay (min)", f"{avg_dep_delay:.2f}", "⏳")
+        col3.metric("Avg Arrival Delay (min)", f"{avg_arr_delay:.2f}", "🚦")
 
+        # === Interactive Bar Chart ===
+        fig = px.bar(
+            df_flight_stats,
+            x="carrier",
+            y="num_flights",
+            color="carrier",
+            title="Number of Flights per Airline",
+            labels={"carrier": "Airline", "num_flights": "Number of Flights"}
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-if __name__ == "__main__":
-    #plot_wind_vs_airtime() # flight time doesn't decrease with higher wind speeds
-    #precipation_vs_delays() #precipiation doesn't seem to effect the delay time
-    #wind_speed_vs_plane_models() #Shows the disbrution over which plane models are used during different wind conditions, indicating that they might preform better under certain cicumstances
-    #flight_distance_vs_wind_speed()# the regression line moves down meaning that longer flights experience less strong wind
-    plane_model_vs_delay_during_wind()# some models experience more delay during windy conditions, other ones stay the same
+        # === Pie Chart for Airline Distribution ===
+        fig_pie = px.pie(
+            df_flight_stats,
+            names="carrier",
+            values="num_flights",
+            title="Flight Distribution by Airline"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
 
-connection.close()
+        # === Expandable Flight Data Table ===
+        with st.expander("📋 View Flight Data Table"):
+            st.dataframe(df_flight_stats.style.format({"avg_dep_delay": "{:.2f}", "avg_arr_delay": "{:.2f}"}))
+
+        # === Map: Show Airport Locations ===
+        st.markdown("### 🌍 Departure & Arrival Airport Locations")
+        airports_filtered = airports_df[airports_df["name"].isin([departure_airport, arrival_airport])]
+        fig_map = px.scatter_mapbox(
+            airports_filtered,
+            lat="lat",
+            lon="lon",
+            text="name",
+            zoom=3,
+            mapbox_style="open-street-map",
+            title="Airport Locations"
+        )
+        st.plotly_chart(fig_map, use_container_width=True)
+
+        # === Top Destinations from Departure Airport ===
+        query_top_destinations = """
+        SELECT dest, COUNT(*) as num_flights
+        FROM flights
+        WHERE origin = (SELECT faa FROM airports WHERE name = ?)
+        GROUP BY dest
+        ORDER BY num_flights DESC
+        LIMIT 5
+        """
+        df_top_destinations = pd.read_sql_query(query_top_destinations, conn, params=(departure_airport,))
+        
+        if not df_top_destinations.empty:
+            st.markdown("### 🌟 Top 5 Destinations from Departure Airport")
+            st.dataframe(df_top_destinations)
+
+# === Custom Styling ===
+st.markdown("""
+<style>
+    .stMetric label {
+        font-size: 18px;
+        font-weight: bold;
+        color: #4CAF50;
+    }
+    .stDataFrame {
+        border: 2px solid #4CAF50;
+        border-radius: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
