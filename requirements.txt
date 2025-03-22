@@ -5,5 +5,4 @@ plotly
 matplotlib
 seaborn
 altair
-sqlite3
 datetime
