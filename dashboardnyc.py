@@ -476,17 +476,17 @@ elif page == "Flight Route Statistics":
 elif page == "Delay Analysis":
 
     def get_data():
-    try:
-        query = """
-        SELECT f.dep_time, f.arr_delay, f.origin, w.wind_speed, w.temp, w.precip
-        FROM flights f
-        JOIN weather w ON f.origin = w.origin 
-            AND f.year = w.year 
-            AND f.month = w.month 
-            AND f.day = w.day
-        WHERE f.arr_delay IS NOT NULL;
-        """
-        df = pd.read_sql_query(query, conn)
+        try:
+            query = """
+            SELECT f.dep_time, f.arr_delay, f.origin, w.wind_speed, w.temp, w.precip
+            FROM flights f
+            JOIN weather w ON f.origin = w.origin 
+                AND f.year = w.year 
+                AND f.month = w.month 
+                AND f.day = w.day
+            WHERE f.arr_delay IS NOT NULL;
+            """
+         df = pd.read_sql_query(query, conn)
 
         # Add this to inspect the shape
         st.write("✅ Delay data loaded:", df.shape)
