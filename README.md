@@ -4,7 +4,7 @@ This project is an interactive dashboard that helps you explore and understand f
 
 Built with Python and Streamlit, it combines data engineering, analysis, and visualization in a clean and easy-to-use web app.
 
-**Live App**: [Launch Dashboard](https://dataengeneering-flights-group9.streamlit.app/)  
+**Live App**: [Launch Dashboard](https://dataengeneering-cdoypn3wy8fwvobqjvuftw.streamlit.app)  
 **GitHub Repo**: [View Repository](https://github.com/beauvantrojen/DataEngeneering)
 
 ---
