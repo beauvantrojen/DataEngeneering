@@ -487,7 +487,7 @@ elif page == "Delay Analysis":
             WHERE f.arr_delay IS NOT NULL;
             LIMIT 10000;
             """
-             df = pd.read_sql_query(query, conn)
+            df = pd.read_sql_query(query, conn)
             return df
         except Exception as e:
             st.error(f"Failed to load delay analysis data: {e}")
