@@ -477,18 +477,13 @@ elif page == "Delay Analysis":
     def get_data():
         try:
             query = """
-            SELECT f.dep_time, f.arr_delay, f.origin,
-                   w.wind_speed, w.temp, w.precip
-            FROM flights f
-            JOIN weather w ON f.origin = w.origin
-                AND f.year = w.year
-                AND f.month = w.month
-                AND f.day = w.day
-            WHERE f.arr_delay IS NOT NULL
-                AND w.temp IS NOT NULL
-                AND w.wind_speed IS NOT NULL
-                AND w.precip IS NOT NULL
-            LIMIT 10000;
+                SELECT f.dep_time, f.arr_delay, f.origin, w.wind_speed, w.temp, w.precip
+                FROM flights f
+                JOIN weather w ON f.origin = w.origin 
+                    AND f.year = w.year 
+                    AND f.month = w.month 
+                    AND f.day = w.day
+                WHERE f.arr_delay IS NOT NULL;
             """
             df = pd.read_sql_query(query, conn)
             return df
