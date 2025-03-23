@@ -474,18 +474,20 @@ elif page == "Flight Route Statistics":
     )
 
 elif page == "Delay Analysis":
-
     def get_data():
         try:
             query = """
-            SELECT f.dep_time, f.arr_delay, f.origin, f.year, f.month, f.day, w.wind_speed, w.temp, w.precip
+            SELECT f.dep_time, f.arr_delay, f.origin,
+                   w.wind_speed, w.temp, w.precip
             FROM flights f
-            JOIN weather w ON f.origin = w.origin 
-                AND f.year = w.year 
-                AND f.month = w.month 
+            JOIN weather w ON f.origin = w.origin
+                AND f.year = w.year
+                AND f.month = w.month
                 AND f.day = w.day
-                AND CAST(f.dep_time / 100 AS INT) = w.hour
             WHERE f.arr_delay IS NOT NULL
+                AND w.temp IS NOT NULL
+                AND w.wind_speed IS NOT NULL
+                AND w.precip IS NOT NULL
             LIMIT 10000;
             """
             df = pd.read_sql_query(query, conn)
@@ -493,9 +495,9 @@ elif page == "Delay Analysis":
         except Exception as e:
             st.error(f"Failed to load delay analysis data: {e}")
             return pd.DataFrame()
+    
 
     df = get_data()
-
     if df.empty:
         st.warning("No delay data available.")
         st.stop()
