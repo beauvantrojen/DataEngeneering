@@ -488,7 +488,14 @@ elif page == "Delay Analysis":
         df = pd.read_sql_query(query, conn)
         return df
 
-    df = get_data()
+    try:
+        df = get_data()
+        if df.empty:
+            st.warning("No delay data found. This might be due to join mismatch or empty tables.")
+            st.stop()
+    except Exception as e:
+        st.error(f"Error loading delay data: {e}")
+        st.stop()
 
     st.markdown(
         '<h1 style="text-align:center; color:black; font-size:50px; font-weight:bold; font-family:Trebuchet MS; border-bottom: 5px solid #8B008B; padding-bottom:10px;">✈️ Flight Delay Analysis</h1>',
