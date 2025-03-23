@@ -1,39 +1,45 @@
-# NYC Flights Dashboard
+# Flights Project
 
-This project is an interactive dashboard that helps you explore and understand flight activity from New York City airports in 2023. Using real data and visualizations, it shows how flights are distributed across time, carriers, routes, and weather conditions.
+This repository contains a complete data engineering project focused on analyzing flight data from New York City in 2023. It includes everything from data processing and SQL queries to interactive visualizations and dashboards built using Python.
 
-Built with Python and Streamlit, it combines data engineering, analysis, and visualization in a clean and easy-to-use web app.
+The main part of the project is a Streamlit-based dashboard that lets users explore flight trends, delay patterns, airport traffic, and weather impacts. In addition to the dashboard, the repo also includes raw data files, database schemas, analysis scripts, and supporting files used throughout the project.
 
-**Live App**: [Launch Dashboard](https://dataengeneering-cdoypn3wy8fwvobqjvuftw.streamlit.app)  
-**GitHub Repo**: [View Repository](https://github.com/beauvantrojen/DataEngeneering)
+**Live Dashboard**: [Launch Dashboard](https://dataengeneering-cdoypn3wy8fwvobqjvuftw.streamlit.app)  
 
 ---
 
-## What You’ll Find in the Dashboard
+## What's Inside
 
-The dashboard is divided into four main sections:
+- `dashboardnyc.py`: Main Streamlit application
+- `flights_database.db`: SQLite database with joined flight, weather, and airport data
+- `airports.csv`: Airport metadata with codes and coordinates
+- SQL queries and data wrangling logic (in-code)
+- Notebooks and additional scripts (depending on the branch)
+- Clean layout for deployment and local development
 
-### 1. Overview
-- Total number of flights
-- Average flight duration and distance
-- Flight distribution across airports and airlines
-- Summary of departure and arrival delays
+---
 
-### 2. Flight Route Statistics
-- Select any departure and arrival airport
-- See flight counts and average delays per carrier
-- View maps of airports and routes
-- Top destinations from a selected airport
+## Features
 
-### 3. Delay Analysis
-- Explore how weather (wind, temperature, and rain) affects delays
-- Understand delay patterns throughout the day
+### Overview Page
+- Total flights, flight duration, and distance metrics
+- Flight distribution by carrier and airport
+- Delay statistics with detailed breakdowns
 
-### 4. Time-Based Statistics
-- Choose a date in 2023 and view all flights that day
-- Airport activity by hour (arrivals and departures)
-- Average departure delays by hour
-- Distribution of airtime
+### Flight Route Statistics
+- Select origin and destination to view route performance
+- Analyze delay averages by carrier
+- View top destinations and interactive airport maps
+
+### Delay Analysis
+- Visualize the impact of wind, temperature, and precipitation
+- Track hourly delay trends
+
+### Time-Based Statistics
+- Choose any date in 2023 and explore:
+  - Number of flights
+  - Hourly departure/arrival patterns
+  - Delay trends and airtime distribution
 
 ---
 
@@ -47,23 +53,12 @@ The dashboard is divided into four main sections:
 
 ---
 
-## Data Source
-
-All the data used in this project comes from a cleaned and preprocessed SQLite database: `flights_database.db`.  
-It includes three main datasets:
-- `flights`: Flight departure/arrival times, delays, distance, etc.
-- `weather`: Wind speed, temperature, and precipitation
-- `airports`: Metadata including airport names, IATA codes, and coordinates
-
-These were compiled and filtered for flights departing from New York City in 2023.
-
----
-
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.8 or higher
+- `pip` for installing dependencies
 
 ### Installation
 
