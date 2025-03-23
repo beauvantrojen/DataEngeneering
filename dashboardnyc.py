@@ -487,12 +487,10 @@ elif page == "Delay Analysis":
                    tw.temp, tw.wind_speed, tw.precip
             FROM flights f
             JOIN temp_weather tw ON f.origin = tw.origin
-                AND f.year = strftime('%Y', tw.time_hour)
-                AND f.month = strftime('%m', tw.time_hour)
-                AND f.day = strftime('%d', tw.time_hour)
-                AND ABS(CAST(strftime('%s', tw.time_hour) AS INT) - 
-                        (CAST(f.dep_time / 100 AS INT) * 3600 +
-                         (f.dep_time % 100) * 60)) <= 1800
+                AND f.year = CAST(strftime('%Y', tw.time_hour) AS INTEGER)
+                AND f.month = CAST(strftime('%m', tw.time_hour) AS INTEGER)
+                AND f.day = CAST(strftime('%d', tw.time_hour) AS INTEGER)
+                AND CAST(f.dep_time / 100 AS INTEGER) = tw.hour
             WHERE f.arr_delay IS NOT NULL
             LIMIT 10000;
             """
@@ -501,6 +499,7 @@ elif page == "Delay Analysis":
         except Exception as e:
             st.error(f"Failed to load delay analysis data: {e}")
             return pd.DataFrame()
+    
 
     df = get_data()
     st.write("dataset shape:", df.shape)
