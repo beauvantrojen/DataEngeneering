@@ -474,24 +474,22 @@ elif page == "Flight Route Statistics":
     )
 
 elif page == "Delay Analysis":
-    conn.execute("""
-        CREATE TEMP TABLE IF NOT EXISTS temp_weather AS
-        SELECT * FROM weather
-        WHERE temp IS NOT NULL AND wind_speed IS NOT NULL AND precip IS NOT NULL;
-    """)
     def get_data():
         try:
             query = """
             SELECT f.dep_time, f.arr_delay, f.origin, f.distance,
                    f.year, f.month, f.day,
-                   tw.temp, tw.wind_speed, tw.precip
+                   w.temp, w.wind_speed, w.precip
             FROM flights f
-            JOIN temp_weather tw ON f.origin = tw.origin
-                AND f.year = CAST(strftime('%Y', tw.time_hour) AS INTEGER)
-                AND f.month = CAST(strftime('%m', tw.time_hour) AS INTEGER)
-                AND f.day = CAST(strftime('%d', tw.time_hour) AS INTEGER)
-                AND CAST(f.dep_time / 100 AS INTEGER) = tw.hour
+            JOIN weather w ON f.origin = w.origin
+                AND f.year = CAST(strftime('%Y', w.time_hour) AS INTEGER)
+                AND f.month = CAST(strftime('%m', w.time_hour) AS INTEGER)
+                AND f.day = CAST(strftime('%d', w.time_hour) AS INTEGER)
+                AND CAST(f.dep_time / 100 AS INTEGER) = w.hour
             WHERE f.arr_delay IS NOT NULL
+              AND w.temp IS NOT NULL
+              AND w.wind_speed IS NOT NULL
+              AND w.precip IS NOT NULL
             LIMIT 10000;
             """
             df = pd.read_sql_query(query, conn)
