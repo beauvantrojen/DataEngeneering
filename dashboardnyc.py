@@ -488,7 +488,7 @@ elif page == "Delay Analysis":
                 AND w.temp IS NOT NULL
                 AND w.wind_speed IS NOT NULL
                 AND w.precip IS NOT NULL
-            LIMIT 10000;
+            LIMIT 500000;
             """
             df = pd.read_sql_query(query, conn)
             return df
