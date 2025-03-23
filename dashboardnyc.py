@@ -474,25 +474,33 @@ elif page == "Flight Route Statistics":
     )
 
 elif page == "Delay Analysis":
-
+    conn.execute("""
+        CREATE TEMP TABLE IF NOT EXISTS temp_weather AS
+        SELECT * FROM weather
+        WHERE temp IS NOT NULL AND wind_speed IS NOT NULL AND precip IS NOT NULL;
+    """)
     def get_data():
-        try:
-            query = """
-            SELECT f.dep_time, f.arr_delay, f.origin, f.year, f.month, f.day, w.wind_speed, w.temp, w.precip
-            FROM flights f
-            JOIN weather w ON f.origin = w.origin 
-                AND f.year = w.year 
-                AND f.month = w.month 
-                AND f.day = w.day
-                AND CAST(f.dep_time / 100 AS INT) = w.hour
-            WHERE f.arr_delay IS NOT NULL
-            LIMIT 10000;
-            """
-            df = pd.read_sql_query(query, conn)
-            return df
-        except Exception as e:
-            st.error(f"Failed to load delay analysis data: {e}")
-            return pd.DataFrame()
+    try:
+        query = """
+        SELECT f.dep_time, f.arr_delay, f.origin, f.distance,
+               f.year, f.month, f.day,
+               tw.temp, tw.wind_speed, tw.precip
+        FROM flights f
+        JOIN temp_weather tw ON f.origin = tw.origin
+            AND f.year = strftime('%Y', tw.time_hour)
+            AND f.month = strftime('%m', tw.time_hour)
+            AND f.day = strftime('%d', tw.time_hour)
+            AND ABS(CAST(strftime('%s', tw.time_hour) AS INT) - 
+                    (CAST(f.dep_time / 100 AS INT) * 3600 +
+                     (f.dep_time % 100) * 60)) <= 1800
+        WHERE f.arr_delay IS NOT NULL
+        LIMIT 10000;
+        """
+        df = pd.read_sql_query(query, conn)
+        return df
+    except Exception as e:
+        st.error(f"Failed to load delay analysis data: {e}")
+        return pd.DataFrame()
 
     df = get_data()
     st.write("dataset shape:", df.shape)
