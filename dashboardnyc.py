@@ -494,6 +494,9 @@ elif page == "Delay Analysis":
             return pd.DataFrame()
 
     df = get_data()
+    #check for non nulls
+    st.write("temp nulls:", df["temp"].isna().sum())
+    st.write("temp non-nulls:", df["temp"].notna().sum())
 
     if df.empty:
         st.warning("No delay data available.")
