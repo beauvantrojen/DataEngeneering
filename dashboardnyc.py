@@ -438,7 +438,6 @@ elif page == "Flight Route Statistics":
                     zoom=3,
                     title="Airport Locations",
             )
-            
             st.plotly_chart(fig_map, use_container_width=True)
 
             query_top_destinations = """
