@@ -476,25 +476,32 @@ elif page == "Flight Route Statistics":
 elif page == "Delay Analysis":
 
     def get_data():
-        query = """
-    SELECT f.dep_time, f.arr_delay, f.origin, w.wind_speed, w.temp, w.precip
-    FROM flights f
-    JOIN weather w ON f.origin = w.origin 
-        AND f.year = w.year 
-        AND f.month = w.month 
-        AND f.day = w.day
-    WHERE f.arr_delay IS NOT NULL;
-    """
-        df = pd.read_sql_query(query, conn)
-        return df
-
     try:
-        df = get_data()
-        if df.empty:
-            st.warning("No delay data found. This might be due to join mismatch or empty tables.")
-            st.stop()
+        query = """
+        SELECT f.dep_time, f.arr_delay, f.origin, w.wind_speed, w.temp, w.precip
+        FROM flights f
+        JOIN weather w ON f.origin = w.origin 
+            AND f.year = w.year 
+            AND f.month = w.month 
+            AND f.day = w.day
+        WHERE f.arr_delay IS NOT NULL;
+        """
+        df = pd.read_sql_query(query, conn)
+
+        # Add this to inspect the shape
+        st.write("✅ Delay data loaded:", df.shape)
+
+        return df
     except Exception as e:
-        st.error(f"Error loading delay data: {e}")
+        st.error(f"Failed to load delay analysis data: {e}")
+        return pd.DataFrame()
+
+    if df.empty:
+        st.warning("No delay data available.")
+        st.stop()
+
+    if df.empty:
+        st.warning("No delay data available.")
         st.stop()
 
     st.markdown(
