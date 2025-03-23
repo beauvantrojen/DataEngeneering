@@ -430,15 +430,15 @@ elif page == "Flight Route Statistics":
             airports_filtered = airports_df[
                 airports_df["name"].isin([departure_airport, arrival_airport])
             ]
-            fig_map = px.scatter_mapbox(
-                airports_filtered,
-                lat="lat",
-                lon="lon",
-                text="name",
-                zoom=3,
-                mapbox_style="open-street-map",
-                title="Airport Locations",
-            )
+            fig_map = px.scatter_map(
+                    airports_filtered,
+                    lat="lat",
+                    lon="lon",
+                    text="name",
+                    zoom=3,
+                    title="Airport Locations",
+                )
+        fig_map.update_layout(maplibre_style="open-street-map")
             st.plotly_chart(fig_map, use_container_width=True)
 
             query_top_destinations = """
