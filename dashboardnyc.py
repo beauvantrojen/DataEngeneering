@@ -484,7 +484,7 @@ elif page == "Delay Analysis":
                     AND f.month = w.month 
                     AND f.day = w.day
                 WHERE f.arr_delay IS NOT NULL
-                LIMIT 10000;
+                LIMIT 30000;
             """
             df = pd.read_sql_query(query, conn)
             return df
