@@ -478,7 +478,7 @@ elif page == "Delay Analysis":
     def get_data():
         try:
             query = """
-            SELECT f.dep_time, f.arr_delay, f.origin, w.wind_speed, w.temp, w.precip
+            SELECT f.dep_time, f.arr_delay, f.origin, f.year, f.month, f.day, w.wind_speed, w.temp, w.precip
             FROM flights f
             JOIN weather w ON f.origin = w.origin 
                 AND f.year = w.year 
