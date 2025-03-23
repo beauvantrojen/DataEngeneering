@@ -495,6 +495,13 @@ elif page == "Delay Analysis":
             return pd.DataFrame()
 
     df = get_data()
+    st.write("dataset shape:", df.shape)
+    st.dataframe(df.head(10))
+    st.write("nulls per column:")
+    st.write(df.isna().sum())
+    st.write("Unique temperature values:", df["temp"].value_counts())
+    df_temp = df.dropna(subset=["temp", "arr_delay"])
+    st.write("Filtered (non-null temp + arr_delay):", df_temp.shape)
 
     if df.empty:
         st.warning("No delay data available.")
