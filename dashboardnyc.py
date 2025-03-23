@@ -484,6 +484,7 @@ elif page == "Delay Analysis":
                 AND f.year = w.year 
                 AND f.month = w.month 
                 AND f.day = w.day
+                AND CAST(f.dep_time / 100 AS INT) = w.hour
             WHERE f.arr_delay IS NOT NULL
             LIMIT 10000;
             """
