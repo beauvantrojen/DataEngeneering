@@ -485,12 +485,11 @@ elif page == "Delay Analysis":
                 AND f.year = CAST(strftime('%Y', w.time_hour) AS INTEGER)
                 AND f.month = CAST(strftime('%m', w.time_hour) AS INTEGER)
                 AND f.day = CAST(strftime('%d', w.time_hour) AS INTEGER)
-                AND CAST(f.dep_time / 100 AS INTEGER) = w.hour
             WHERE f.arr_delay IS NOT NULL
               AND w.temp IS NOT NULL
               AND w.wind_speed IS NOT NULL
               AND w.precip IS NOT NULL
-            LIMIT 10000;
+            LIMIT 5000;
             """
             df = pd.read_sql_query(query, conn)
             return df
