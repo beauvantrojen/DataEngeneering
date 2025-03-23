@@ -480,6 +480,7 @@ elif page == "Delay Analysis":
         WHERE temp IS NOT NULL AND wind_speed IS NOT NULL AND precip IS NOT NULL;
     """)
     def get_data():
+    def get_data():
     try:
         query = """
         SELECT f.dep_time, f.arr_delay, f.origin, f.distance,
