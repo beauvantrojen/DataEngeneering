@@ -533,12 +533,16 @@ elif page == "Delay Analysis":
     st.write("🌬️ This graph shows how wind speed impacts arrival delays.")
 
     st.markdown("### Temperature vs Delay", unsafe_allow_html=True)
-    fig, ax = plt.subplots(figsize=(10, 5))
-    sns.scatterplot(x=df["temp"], y=df["arr_delay"], ax=ax, alpha=0.5, color="red")
-    ax.set_title("Temperature vs Delay")
-    ax.set_xlabel("Temperature (°F)")
-    ax.set_ylabel("Arrival Delay (min)")
-    st.pyplot(fig)
+    df_temp = df.dropna(subset=["temp", "arr_delay"])
+    if df_temp.empty:
+        st.warning("No data available for temperature vs delay plot.")
+    else:
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.scatterplot(x=df_temp["temp"], y=df_temp["arr_delay"], ax=ax, alpha=0.5, color="red")
+        ax.set_title("Temperature vs Delay")
+        ax.set_xlabel("Temperature (°F)")
+        ax.set_ylabel("Arrival Delay (min)")
+        st.pyplot(fig)
 
     st.write("🌡️ This graph visualizes the effect of temperature on flight delays.")
 
