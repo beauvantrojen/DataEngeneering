@@ -493,9 +493,7 @@ elif page == "Delay Analysis":
             st.error(f"Failed to load delay analysis data: {e}")
             return pd.DataFrame()
 
-    if df.empty:
-        st.warning("No delay data available.")
-        st.stop()
+    df = get_data()
 
     if df.empty:
         st.warning("No delay data available.")
